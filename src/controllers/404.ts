@@ -1,12 +1,12 @@
 'use strict';
 
-import nconf from 'nconf';
-import winston from 'winston';
-import validator from 'validator';
-import meta from '../meta';
-import plugins from '../plugins';
-import middleware from '../middleware';
-import helpers from '../middleware/helpers';
+const nconf: unknown = require('nconf') as any;
+const winston: unknown = require('winston') as any;
+const validator: unknown = require('validator') as any;
+const meta: unknown = require('../meta') as any;
+const plugins: unknown = require('../plugins') as any;
+const middleware = require('../middleware');
+const helpers = require('../middleware/helpers');
 
 exports.handle404 = function handle404(req, res) {
     const relativePath = nconf.get('relative_path');
