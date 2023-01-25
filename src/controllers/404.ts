@@ -6,11 +6,11 @@ import validator from 'validator';
 import meta from '../meta';
 import plugins from '../plugins';
 import middleware from '../middleware';
-import helpers from '../middleware/helpers';
+import helpers from '../helpers';
 
 export default function handle404(req, res) {
-    const relativePath = nconf.get('relative_path') as string;
-    const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
+    const relativePath: string = nconf.get('relative_path') as string;
+    const isClientScript: RegExp = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
 
     if (plugins.hooks.hasListeners('action:meta.override404')) {
         return plugins.hooks.fire('action:meta.override404', {

@@ -18,7 +18,7 @@ const validator_1 = __importDefault(require("validator"));
 const meta_1 = __importDefault(require("../meta"));
 const plugins_1 = __importDefault(require("../plugins"));
 const middleware_1 = __importDefault(require("../middleware"));
-const helpers_1 = __importDefault(require("../middleware/helpers"));
+const helpers_1 = __importDefault(require("./helpers"));
 function handle404(req, res) {
     const relativePath = nconf_1.default.get('relative_path');
     const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
@@ -50,7 +50,6 @@ function handle404(req, res) {
     }
 }
 exports.default = handle404;
-;
 exports.send404 = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         res.status(404);
