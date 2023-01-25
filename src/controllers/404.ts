@@ -10,7 +10,7 @@ import helpers from '../helpers';
 
 export default function handle404(req, res) {
     const relativePath: string = nconf.get('relative_path') as string;
-    const isClientScript: RegExp = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
+    const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
 
     if (plugins.hooks.hasListeners('action:meta.override404')) {
         return plugins.hooks.fire('action:meta.override404', {
