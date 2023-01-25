@@ -1,15 +1,15 @@
-'use strict';
 
-const nconf = require('nconf') as any;
-const winston = require('winston') as any;
-const validator = require('validator') as any;
-const meta = require('../meta') as any;
-const plugins = require('../plugins') as any;
-const middleware = require('../middleware');
-const helpers = require('../middleware/helpers');
 
-exports.handle404 = function handle404(req, res) {
-    const relativePath = nconf.get('relative_path');
+import nconf from 'nconf';
+import winston from 'winston';
+import validator from 'validator';
+import meta from '../meta';
+import plugins from '../plugins';
+import middleware from '../middleware';
+import helpers from '../middleware/helpers';
+
+export default function handle404(req, res) {
+    const relativePath = nconf.get('relative_path') as string;
     const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
 
     if (plugins.hooks.hasListeners('action:meta.override404')) {
@@ -41,7 +41,7 @@ exports.handle404 = function handle404(req, res) {
     } else {
         res.status(404).type('txt').send('Not found');
     }
-};
+}
 
 exports.send404 = async function (req, res) {
     res.status(404);
