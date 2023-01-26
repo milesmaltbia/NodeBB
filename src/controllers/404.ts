@@ -1,23 +1,29 @@
-
+import { Request, Response } from "express";
 
 import nconf from 'nconf';
 import winston from 'winston';
 import validator from 'validator';
+
 import meta from '../meta';
 import plugins from '../plugins';
 import middleware from '../middleware';
-import helpers from '../helpers';
+import helpers from '../middleware/helpers';
 
-export default function handle404(req, res) {
+export default (req: Request, res: Response) => {  const { num } = req.params;
+
+type happy = { sad: string }
+
+
+export async function handle404(req: Request, res: Response): Promise<void> {
     const relativePath: string = nconf.get('relative_path') as string;
-    const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
+    const isClientScript: RegExp = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
 
     if (plugins.hooks.hasListeners('action:meta.override404')) {
         return plugins.hooks.fire('action:meta.override404', {
             req: req,
             res: res,
             error: {},
-        });
+        }) as Promise<void>;
     }
 
     if (isClientScript.test(req.url)) {
@@ -41,17 +47,17 @@ export default function handle404(req, res) {
     } else {
         res.status(404).type('txt').send('Not found');
     }
-}
+};
 
-exports.send404 = async function (req, res) {
+export default async function send404(req, res): Promise<void> {
     res.status(404);
-    const path = String(req.path || '');
+    const path: string = String(req.path || '');
     if (res.locals.isAPI) {
         return res.json({
             path: validator.escape(path.replace(/^\/api/, '')),
             title: '[[global:404.title]]',
             bodyClass: helpers.buildBodyClass(req, res),
-        });
+        }) as unknown as Promise<void>;
     }
 
     await middleware.buildHeaderAsync(req, res);
@@ -60,4 +66,4 @@ exports.send404 = async function (req, res) {
         title: '[[global:404.title]]',
         bodyClass: helpers.buildBodyClass(req, res),
     });
-};
+}};

@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,64 +7,65 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const nconf_1 = __importDefault(require("nconf"));
-const winston_1 = __importDefault(require("winston"));
-const validator_1 = __importDefault(require("validator"));
-const meta_1 = __importDefault(require("../meta"));
-const plugins_1 = __importDefault(require("../plugins"));
-const middleware_1 = __importDefault(require("../middleware"));
-const helpers_1 = __importDefault(require("./helpers"));
-function handle404(req, res) {
-    const relativePath = nconf_1.default.get('relative_path');
-    const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
-    if (plugins_1.default.hooks.hasListeners('action:meta.override404')) {
-        return plugins_1.default.hooks.fire('action:meta.override404', {
-            req: req,
-            res: res,
-            error: {},
+import nconf from 'nconf';
+import winston from 'winston';
+import validator from 'validator';
+import meta from '../meta';
+import plugins from '../plugins';
+import middleware from '../middleware';
+import helpers from '../middleware/helpers';
+export default (req, res) => {
+    const { num } = req.params;
+    export function handle404(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const relativePath = nconf.get('relative_path');
+            const isClientScript = new RegExp(`^${relativePath}\\/assets\\/src\\/.+\\.js(\\?v=\\w+)?$`);
+            if (plugins.hooks.hasListeners('action:meta.override404')) {
+                return plugins.hooks.fire('action:meta.override404', {
+                    req: req,
+                    res: res,
+                    error: {},
+                });
+            }
+            if (isClientScript.test(req.url)) {
+                res.type('text/javascript').status(404).send('Not Found');
+            }
+            else if (!res.locals.isAPI && (req.path.startsWith(`${relativePath}/assets/uploads`) ||
+                (req.get('accept') && !req.get('accept').includes('text/html')) ||
+                req.path === '/favicon.ico')) {
+                meta.errors.log404(req.path || '');
+                res.sendStatus(404);
+            }
+            else if (req.accepts('html')) {
+                if (process.env.NODE_ENV === 'development') {
+                    winston.warn(`Route requested but not found: ${req.url}`);
+                }
+                meta.errors.log404(req.path.replace(/^\/api/, '') || '');
+                exports.send404(req, res);
+            }
+            else {
+                res.status(404).type('txt').send('Not found');
+            }
         });
     }
-    if (isClientScript.test(req.url)) {
-        res.type('text/javascript').status(404).send('Not Found');
-    }
-    else if (!res.locals.isAPI && (req.path.startsWith(`${relativePath}/assets/uploads`) ||
-        (req.get('accept') && !req.get('accept').includes('text/html')) ||
-        req.path === '/favicon.ico')) {
-        meta_1.default.errors.log404(req.path || '');
-        res.sendStatus(404);
-    }
-    else if (req.accepts('html')) {
-        if (process.env.NODE_ENV === 'development') {
-            winston_1.default.warn(`Route requested but not found: ${req.url}`);
-        }
-        meta_1.default.errors.log404(req.path.replace(/^\/api/, '') || '');
-        exports.send404(req, res);
-    }
-    else {
-        res.status(404).type('txt').send('Not found');
-    }
-}
-exports.default = handle404;
-exports.send404 = function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        res.status(404);
-        const path = String(req.path || '');
-        if (res.locals.isAPI) {
-            return res.json({
-                path: validator_1.default.escape(path.replace(/^\/api/, '')),
+    ;
+    export function send404(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            res.status(404);
+            const path = String(req.path || '');
+            if (res.locals.isAPI) {
+                return res.json({
+                    path: validator.escape(path.replace(/^\/api/, '')),
+                    title: '[[global:404.title]]',
+                    bodyClass: helpers.buildBodyClass(req, res),
+                });
+            }
+            yield middleware.buildHeaderAsync(req, res);
+            yield res.render('404', {
+                path: validator.escape(path),
                 title: '[[global:404.title]]',
-                bodyClass: helpers_1.default.buildBodyClass(req, res),
+                bodyClass: helpers.buildBodyClass(req, res),
             });
-        }
-        yield middleware_1.default.buildHeaderAsync(req, res);
-        yield res.render('404', {
-            path: validator_1.default.escape(path),
-            title: '[[global:404.title]]',
-            bodyClass: helpers_1.default.buildBodyClass(req, res),
         });
-    });
+    }
 };
